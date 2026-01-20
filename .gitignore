@@ -172,3 +172,4 @@ tmp/
 *_weights.npy
 *.pth
 .vscode/
+output_masks_cholecseg8k/
