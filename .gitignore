@@ -170,3 +170,5 @@ results/
 tmp/
 *_weights.pth
 *_weights.npy
+*.pth
+.vscode/
