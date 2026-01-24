@@ -6,6 +6,7 @@ from pathlib import Path
 from PIL import Image
 from tqdm import tqdm
 import shutil
+import argparse
 # %%
 
 def extract_frame_number_from_folder(folder_name):
@@ -131,7 +132,7 @@ def preprocess_cholecseg8k(
 def process_SASVi_test(
     file: str = 'test_split.txt',
     convert_to_jpg: bool = True, 
-    save_folder: str = '/home/guests/myron_theocharakis/longform-surgery/forked_SASVi/test_set_masks/video01/'
+    save_folder: str = './test_set_masks/video01/'
 ):
     with open(file) as f: 
         video_list = [line.strip() for line in f.readlines()]
@@ -154,15 +155,25 @@ def process_SASVi_test(
             img.save(save_folder+target_filename, 'JPEG', quality=95)
 
 #%%
-# preprocess_cholecseg8k(
-#     source_dir='/home/data/tumai/splatgraph/data/cholecseg8k',
-#     target_dir='/home/guests/myron_theocharakis/process_cholec',
-#     convert_to_jpg = True,
-#     copy_masks = False,
-#     video_filter = None,
-#     dry_run = False
-# )
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Chunked video segmentation inference")
+    parser.add_argument("--source_dir", type=str, default="/home/data/tumai/splatgraph/data/cholecseg8k")
+    parser.add_argument("--target_dir", type=str, default=None)
+    parser.add_argument("--convert_to_jpg", type=bool, default=True)
+    parser.add_argument("--copy_masks", type=bool, default=False)
+    parser.add_argument("--video_filter", type=bool, default=None)
+    parser.add_argument("--dry_run", type=bool, default=False)
+    args = parser.parse_args()
 
-process_SASVi_test()
+    preprocess_cholecseg8k(
+        source_dir= args.source_dir,
+        target_dir=args.target_dir,
+        convert_to_jpg = True,
+        copy_masks = False,
+        video_filter = None,
+        dry_run = False
+    )
+
+# process_SASVi_test()
 
 # %%
