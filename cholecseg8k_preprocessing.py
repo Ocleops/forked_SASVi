@@ -128,15 +128,41 @@ def preprocess_cholecseg8k(
     print(f"\nYou can now run SASVi with:")
     print(f"  --base_video_dir {target_path}")
 
-#%%
-preprocess_cholecseg8k(
-    source_dir='/home/data/tumai/splatgraph/data/cholecseg8k',
-    target_dir='/home/guests/myron_theocharakis/process_cholec',
-    convert_to_jpg = True,
-    copy_masks = False,
-    video_filter = None,
-    dry_run = False
-)
+def process_SASVi_test(
+    file: str = 'test_split.txt',
+    convert_to_jpg: bool = True, 
+    save_folder: str = '/home/guests/myron_theocharakis/longform-surgery/forked_SASVi/test_set_masks/video01/'
+):
+    with open(file) as f: 
+        video_list = [line.strip() for line in f.readlines()]
 
+    for fname in video_list:
+        frame_num = extract_frame_number_from_file(fname)
+        if frame_num is None:
+            print(f"Warning: Could not extract frame number from {fname}")
+            continue
+
+        if convert_to_jpg:
+            target_filename = f"{frame_num:05d}.jpg"
+        else:
+            target_filename = f"{frame_num:05d}.png"
+        
+        if convert_to_jpg:
+            # Convert PNG to JPEG
+            img = Image.open(fname).convert('RGB')
+
+            img.save(save_folder+target_filename, 'JPEG', quality=95)
+
+#%%
+# preprocess_cholecseg8k(
+#     source_dir='/home/data/tumai/splatgraph/data/cholecseg8k',
+#     target_dir='/home/guests/myron_theocharakis/process_cholec',
+#     convert_to_jpg = True,
+#     copy_masks = False,
+#     video_filter = None,
+#     dry_run = False
+# )
+
+process_SASVi_test()
 
 # %%
