@@ -48,6 +48,8 @@ def preprocess_cholecseg8k(
     if not source_path.exists():
         raise ValueError(f"Source directory does not exist: {source_path}")
     
+    target_path.mkdir(parents=True, exist_ok=True)
+    
     # Find all video directories
     video_dirs = sorted([d for d in source_path.iterdir() if d.is_dir()])
     
@@ -137,6 +139,9 @@ def process_SASVi_test(
     with open(file) as f: 
         video_list = [line.strip() for line in f.readlines()]
 
+    save_folder = Path(save_folder)
+    save_folder.mkdir(parents=True, exist_ok=True)
+
     for fname in video_list:
         frame_num = extract_frame_number_from_file(fname)
         if frame_num is None:
@@ -156,24 +161,24 @@ def process_SASVi_test(
 
 #%%
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Chunked video segmentation inference")
-    parser.add_argument("--source_dir", type=str, default="/home/data/tumai/splatgraph/data/cholecseg8k")
-    parser.add_argument("--target_dir", type=str, default=None)
-    parser.add_argument("--convert_to_jpg", type=bool, default=True)
-    parser.add_argument("--copy_masks", type=bool, default=False)
-    parser.add_argument("--video_filter", type=bool, default=None)
-    parser.add_argument("--dry_run", type=bool, default=False)
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser(description="Chunked video segmentation inference")
+    # parser.add_argument("--source_dir", type=str, default="/home/data/tumai/splatgraph/data/cholecseg8k")
+    # parser.add_argument("--target_dir", type=str, default=None)
+    # parser.add_argument("--convert_to_jpg", type=bool, default=True)
+    # parser.add_argument("--copy_masks", type=bool, default=False)
+    # parser.add_argument("--video_filter", type=bool, default=None)
+    # parser.add_argument("--dry_run", type=bool, default=False)
+    # args = parser.parse_args()
 
-    preprocess_cholecseg8k(
-        source_dir= args.source_dir,
-        target_dir=args.target_dir,
-        convert_to_jpg = True,
-        copy_masks = False,
-        video_filter = None,
-        dry_run = False
-    )
+    # preprocess_cholecseg8k(
+    #     source_dir= args.source_dir,
+    #     target_dir=args.target_dir,
+    #     convert_to_jpg = True,
+    #     copy_masks = False,
+    #     video_filter = None,
+    #     dry_run = False
+    # )
 
-# process_SASVi_test()
+    process_SASVi_test()
 
 # %%

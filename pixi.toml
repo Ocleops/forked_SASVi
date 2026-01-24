@@ -108,3 +108,6 @@ download-sam2-checkpoints = { cmd = "cd sasvi/src/sam2/checkpoints && bash downl
 
 # Full setup: runs all installation steps in order
 setup = { depends-on = ["clone-sasvi", "install-sds-playground", "install-sam2", "download-sam2-checkpoints"] }
+
+test = {cmd = "python3 ./src/sam2/test.py", depends-on=["setup"]}
+process_cholegsec8k = {cmd = "python3 forked_SASVi/cholecseg8k_preprocessing.py", depends-on=["test"]}
