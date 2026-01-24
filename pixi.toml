@@ -1,91 +1,45 @@
-[project]
+[workspace]
 name = "sasvi"
-
 channels = ["conda-forge", "pytorch", "nvidia"]
-patforms = ["linux-64"]
+platforms = ["linux-64"]
 
 [system-requirements]
 cuda = "12"
 
 [dependencies]
-# Python version (from README: python=3.11)
 python = "3.11.*"
 pip = ">=24.0"
 
-# PyTorch with CUDA support (from README: torch>=2.3.1, torchvision>=0.18.1)
-# Updated to match your system's CUDA 12.2
+# PyTorch - use 12.1 (works fine with your 12.2 driver)
 pytorch = ">=2.3.1"
 torchvision = ">=0.18.1"
-pytorch-cuda = "12.2"
+pytorch-cuda = "12.1"
 
-# ===== From requirements.txt =====
-# numpy==1.26.3
-numpy = "1.26.3"
-
-# scikit-image==0.22.0
-scikit-image = "0.22.0"
-
-# matplotlib
+# From requirements.txt (with correct version syntax)
+numpy = "==1.26.3"
+scikit-image = "==0.22.0"
 matplotlib = ">=3.7.0"
-
-# pandas
 pandas = ">=2.0.0"
-
-# tqdm
 tqdm = ">=4.65.0"
-
-# natsort
 natsort = ">=8.4.0"
 
-# ===== Additional dependencies for the project =====
-# Required for video processing
+# Additional dependencies
 ffmpeg = ">=6.0"
-
-# Required for jpeg4py (libjpeg-turbo backend)
 libjpeg-turbo = ">=2.1.0"
-
-# OpenCV for image processing
 opencv = ">=4.8.0"
-
-# PyYAML for config files
 pyyaml = ">=6.0"
-
-# Hydra for SAM2 configs
 hydra-core = ">=1.3.0"
-
-# scipy (commonly needed, dependency of scikit-image)
 scipy = ">=1.10.0"
-
-# pillow for image I/O
 pillow = ">=10.0.0"
 
 [pypi-dependencies]
-# ===== From requirements.txt =====
-# albumentations==1.3.1 (not on conda-forge with this exact version)
 albumentations = "==1.3.1"
-
-# jpeg4py (Python bindings for libjpeg-turbo, not on conda)
 jpeg4py = "*"
-
-# torchprofile (not on conda)
 torchprofile = "*"
-
-# ===== Detectron2 for Mask R-CNN, DETR, Mask2Former overseers =====
-# Pre-built wheel for CUDA 12.1 + PyTorch 2.3 + Python 3.11
-# (CUDA 12.1 wheels work fine with CUDA 12.2 drivers)
 detectron2 = { url = "https://dl.fbaipublicfiles.com/detectron2/wheels/cu121/torch2.3/detectron2-0.6%2Bcu121-cp311-cp311-linux_x86_64.whl" }
-
-# ===== Additional PyPI packages =====
-# For evaluation metrics
 pycocotools = ">=2.0.7"
-
-# timm for vision transformer backbones (used by Mask2Former)
 timm = ">=0.9.0"
-
-# einops for tensor operations
 einops = ">=0.7.0"
-
-# imageio for video I/O
 imageio = ">=2.31.0"
 imageio-ffmpeg = ">=0.4.8"
 
