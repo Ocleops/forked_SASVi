@@ -57,33 +57,33 @@ clone-sds-playground = "git clone https://github.com/MECLabTUDA/SDS_Playground.g
 install-sds-playground = { cmd = "pip install -e sds_playground/", depends-on = ["clone-sds-playground"] }
 
 # ===== SAM2 Setup =====
-install-sam2 = "cd forked_SASVi/src/sam2 && pip install -e ."
+install-sam2 = "cd src/sam2 && pip install -e ."
 
 # ===== SAM2 Checkpoints =====
-create-sam2-checkpoints-dir = "mkdir -p forked_SASVi/src/sam2/checkpoints"
+create-sam2-checkpoints-dir = "mkdir -p src/sam2/checkpoints"
 
-download-sam2-tiny = { cmd = "wget -nc -P forked_SASVi/src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_tiny.pt", depends-on = ["create-sam2-checkpoints-dir"] }
-download-sam2-small = { cmd = "wget -nc -P forked_SASVi/src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_small.pt", depends-on = ["create-sam2-checkpoints-dir"] }
-download-sam2-base-plus = { cmd = "wget -nc -P forked_SASVi/src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_base_plus.pt", depends-on = ["create-sam2-checkpoints-dir"] }
-download-sam2-large = { cmd = "wget -nc -P forked_SASVi/src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_large.pt", depends-on = ["create-sam2-checkpoints-dir"] }
+download-sam2-tiny = { cmd = "wget -nc -P src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_tiny.pt", depends-on = ["create-sam2-checkpoints-dir"] }
+download-sam2-small = { cmd = "wget -nc -P src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_small.pt", depends-on = ["create-sam2-checkpoints-dir"] }
+download-sam2-base-plus = { cmd = "wget -nc -P src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_base_plus.pt", depends-on = ["create-sam2-checkpoints-dir"] }
+download-sam2-large = { cmd = "wget -nc -P src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_large.pt", depends-on = ["create-sam2-checkpoints-dir"] }
 
 download-sam2-checkpoints = { depends-on = ["download-sam2-tiny", "download-sam2-small", "download-sam2-base-plus", "download-sam2-large"] }
 
 # ===== Overseer Checkpoints (from Hugging Face) =====
 create-overseer-checkpoints-dir = """
-mkdir -p forked_SASVi/checkpoints/cadis/detr && \
-mkdir -p forked_SASVi/checkpoints/cadis/mask2former && \
-mkdir -p forked_SASVi/checkpoints/cadis/maskrcnn && \
-mkdir -p forked_SASVi/checkpoints/cataract1k/detr && \
-mkdir -p forked_SASVi/checkpoints/cataract1k/mask2former && \
-mkdir -p forked_SASVi/checkpoints/cataract1k/maskrcnn && \
-mkdir -p forked_SASVi/checkpoints/cholecseg8k/detr && \
-mkdir -p forked_SASVi/checkpoints/cholecseg8k/mask2former && \
-mkdir -p forked_SASVi/checkpoints/cholecseg8k/maskrcnn
+mkdir -p checkpoints/cadis/detr && \
+mkdir -p checkpoints/cadis/mask2former && \
+mkdir -p checkpoints/cadis/maskrcnn && \
+mkdir -p checkpoints/cataract1k/detr && \
+mkdir -p checkpoints/cataract1k/mask2former && \
+mkdir -p checkpoints/cataract1k/maskrcnn && \
+mkdir -p checkpoints/cholecseg8k/detr && \
+mkdir -p checkpoints/cholecseg8k/mask2former && \
+mkdir -p checkpoints/cholecseg8k/maskrcnn
 """
 
 # Download all overseer checkpoints from Hugging Face
-download-overseer-checkpoints = { cmd = "huggingface-cli download SsharvienKumar/SASVi checkpoints --repo-type model --local-dir forked_SASVi/hf_download && cp -r forked_SASVi/hf_download/checkpoints/* forked_SASVi/checkpoints/", depends-on = ["create-overseer-checkpoints-dir"] }
+download-overseer-checkpoints = { cmd = "huggingface-cli download SsharvienKumar/SASVi checkpoints --repo-type model --local-dir hf_download && cp -r hf_download/checkpoints/* checkpoints/", depends-on = ["create-overseer-checkpoints-dir"] }
 
 # ===== Full Setup =====
 setup = { depends-on = ["install-sds-playground", "install-sam2", "download-sam2-checkpoints", "download-overseer-checkpoints"] }
@@ -92,4 +92,4 @@ setup = { depends-on = ["install-sds-playground", "install-sam2", "download-sam2
 check-gpu = "python -c \"import torch; print(f'CUDA available: {torch.cuda.is_available()}'); print(f'GPU count: {torch.cuda.device_count()}'); [print(f'GPU {i}: {torch.cuda.get_device_name(i)}') for i in range(torch.cuda.device_count())]\""
 
 # List downloaded checkpoints
-list-checkpoints = "find forked_SASVi/checkpoints -name '*.pth' -o -name '*.pt' | head -30"
+list-checkpoints = "find checkpoints src/sam2/checkpoints -name '*.pth' -o -name '*.pt' 2>/dev/null | head -30"
