@@ -57,15 +57,15 @@ clone-sds-playground = "git clone https://github.com/MECLabTUDA/SDS_Playground.g
 install-sds-playground = { cmd = "pip install -e sds_playground/", depends-on = ["clone-sds-playground"] }
 
 # ===== SAM2 Setup =====
-install-sam2 = "cd forked_SASVi/src/sam2 && pip install -e ."
+install-sam2 = "cd ./src/sam2 && pip install -e ."
 
 # ===== SAM2 Checkpoints =====
-create-sam2-checkpoints-dir = "mkdir -p forked_SASVi/src/sam2/checkpoints"
+create-sam2-checkpoints-dir = "mkdir -p ./src/sam2/checkpoints"
 
-download-sam2-tiny = { cmd = "wget -nc -P forked_SASVi/src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_tiny.pt", depends-on = ["create-sam2-checkpoints-dir"] }
-download-sam2-small = { cmd = "wget -nc -P forked_SASVi/src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_small.pt", depends-on = ["create-sam2-checkpoints-dir"] }
-download-sam2-base-plus = { cmd = "wget -nc -P forked_SASVi/src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_base_plus.pt", depends-on = ["create-sam2-checkpoints-dir"] }
-download-sam2-large = { cmd = "wget -nc -P forked_SASVi/src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_large.pt", depends-on = ["create-sam2-checkpoints-dir"] }
+download-sam2-tiny = { cmd = "wget -nc -P ./src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_tiny.pt", depends-on = ["create-sam2-checkpoints-dir"] }
+download-sam2-small = { cmd = "wget -nc -P ./src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_small.pt", depends-on = ["create-sam2-checkpoints-dir"] }
+download-sam2-base-plus = { cmd = "wget -nc -P ./src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_base_plus.pt", depends-on = ["create-sam2-checkpoints-dir"] }
+download-sam2-large = { cmd = "wget -nc -P ./src/sam2/checkpoints https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_large.pt", depends-on = ["create-sam2-checkpoints-dir"] }
 
 download-sam2-checkpoints = { depends-on = ["download-sam2-tiny", "download-sam2-small", "download-sam2-base-plus", "download-sam2-large"] }
 
@@ -80,7 +80,8 @@ snapshot_download(
     local_dir='hf_sasvi_download',
     local_dir_use_symlinks=False
 )
-" && cp -r hf_sasvi_download/checkpoints/* forked_SASVi/checkpoints/
+" && mkdir -p ./checkpoints \
+&& cp -r hf_sasvi_download/checkpoints/* ./checkpoints/ 
 """
 
 # ===== Full Setup =====
