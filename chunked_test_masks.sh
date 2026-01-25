@@ -1,7 +1,7 @@
 #!/bin/bash
 # Chunked video segmentation - processes videos in chunks to avoid memory errors
 
-python3 chunked_inference.py \
+pixi run python chunked_inference.py \
 --device cuda \
 --sam2_cfg configs/sam2.1_hiera_l.yaml \
 --sam2_checkpoint src/sam2/checkpoints/sam2.1_hiera_large.pt \
