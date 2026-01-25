@@ -155,7 +155,11 @@ def process_SASVi_test(
         
         if convert_to_jpg:
             # Convert PNG to JPEG
-            img = Image.open(fname).convert('RGB')
+            try:
+                img = Image.open(fname).convert("RGB")
+            except OSError as e:
+                print(f"Skipping broken image: {fname}")
+                continue
 
             img.save(save_folder / target_filename, 'JPEG', quality=95)
 
