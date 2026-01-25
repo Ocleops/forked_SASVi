@@ -157,7 +157,7 @@ def process_SASVi_test(
             # Convert PNG to JPEG
             img = Image.open(fname).convert('RGB')
 
-            img.save(save_folder+target_filename, 'JPEG', quality=95)
+            img.save(save_folder / target_filename, 'JPEG', quality=95)
 
 #%%
 if __name__ == "__main__":

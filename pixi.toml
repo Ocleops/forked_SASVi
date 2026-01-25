@@ -17,7 +17,8 @@ torchvision = ">=0.18.1"
 pytorch-cuda = "==12.1"
 
 # ===== From requirements.txt =====
-numpy = "==1.26.3"
+transformers = ">=4.30.0"
+numpy = ">=1.26.4,<2.7.0"
 scikit-image = "==0.22.0"
 matplotlib = ">=3.7.0"
 pandas = ">=2.0.0"
