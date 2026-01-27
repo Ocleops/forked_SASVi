@@ -195,7 +195,8 @@ def save_masks_to_dir(
     output_mask_path = os.path.join(
         output_mask_dir, video_name, f"{frame_name}_rgb_mask.png"
     )
-    save_ann_png(output_mask_path, output_mask, output_palette, reshape_size=(save_width, save_height))
+    # save_ann_png(output_mask_path, output_mask, output_palette, reshape_size=(save_width, save_height))
+    save_ann_png(output_mask_path, output_mask, output_palette, reshape_size=(width, height))
 
     if save_binary_mask:
         for i in range(num_classes):
@@ -210,8 +211,8 @@ def save_masks_to_dir(
         else:
             output_mask[0] |= ~output_mask[1:].any(axis=0)
 
-        reshape_size = (save_height, save_width)
-        output_mask = np.array([resize(mask, reshape_size, order=0, preserve_range=True, anti_aliasing=False).astype(bool) for mask in output_mask])
+        # reshape_size = (save_height, save_width)
+        # output_mask = np.array([resize(mask, reshape_size, order=0, preserve_range=True, anti_aliasing=False).astype(bool) for mask in output_mask])
         output_mask_path = os.path.join(output_mask_dir, video_name, f"{frame_name}_binary_mask.npz")
         np.savez_compressed(file=output_mask_path, arr=output_mask)
 
