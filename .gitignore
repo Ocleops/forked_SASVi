@@ -177,3 +177,5 @@ test_segmentations/
 test_set_masks/
 pixi.lock
 sds_playground/
+*.png*
+figures/
