@@ -179,3 +179,6 @@ pixi.lock
 sds_playground/
 *.png*
 figures/
+outputs/
+src/outputs/
+

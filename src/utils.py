@@ -15,9 +15,12 @@ from transformers import (DetrImageProcessor, DetrForSegmentation, Mask2FormerFo
 from sds_playground.datasets import CaDISv2_Dataset, CholecSeg8kDataset, Cataract1kSegmentationDataset
 from sds_playground.utils import convert_to_integer_mask, convert_mask_to_RGB, denormalize
 
-from src.model import get_model_instance_segmentation
-from src.data import insert_component_masks, remap_labels, remove_mask_overlap
-
+try:
+    from src.model import get_model_instance_segmentation
+    from src.data import insert_component_masks, remap_labels, remove_mask_overlap
+except:
+    from model import get_model_instance_segmentation
+    from data import insert_component_masks, remap_labels, remove_mask_overlap
 
 def create_logger(log_file_path: Path):
     # Create a logger
