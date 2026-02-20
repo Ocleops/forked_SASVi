@@ -6,6 +6,7 @@ import matplotlib.patches as patches
 from matplotlib.colors import hsv_to_rgb
 from PIL import Image
 import torch
+import os
 #%%
 CHOLECSEG8K_CLASSES = {
     1: "Abdominal_Wall",
@@ -22,10 +23,8 @@ CHOLECSEG8K_CLASSES = {
     12: "Liver_Ligament",
 }
 
-
 # Classes to skip in scene graph (background, abdominal wall)
-SKIP_CLASSES = 1  # Abdominal wall is not useful for scene understanding
-
+SKIP_CLASSES = 1  # Abdominal wall is alwayys present and it creates huge bounding boxes for no reason.
 
 def get_color_for_class(class_id, num_classes=13):
     """Generate a distinct color for each class using HSV color space."""
@@ -80,7 +79,7 @@ def run_inference(model, image_tensor, device: str = 'cuda', score_threshold: fl
     
     return filtered_output
 
-def bounding_boxes(image_array, detections):
+def ploting(image_array, detections):
     boxes = detections['boxes'] # the coordinates of the bounding boxes are returned as (x1, y1, x2, y2) according to the mask_rcnn.py file.
     labels = detections['labels']
     masks = detections['masks']
@@ -140,87 +139,75 @@ def bounding_boxes(image_array, detections):
     axes[2].set_title('Segmentation Masks')
     axes[2].axis('off')
 
-
-# %%
-CHECKPOINT_PATH = '/home/guests/myron_theocharakis/longform-surgery/forked_SASVi/checkpoints/cholecseg8k/maskrcnn/best_val_dice.pth'
-device = 'cuda'
-# img_path = '/home/data/tumai/splatgraph/data/cholecseg8k/video01/video01_00160/frame_174_endo.png'
-img_path = '/home/guests/myron_theocharakis/longform-surgery/forked_SASVi/test_set_masks/video01/00359.jpg'
-model = load_model(checkpoint_path=CHECKPOINT_PATH, device=device)
-img_tensor, img_array = preprocess_image(image_path=img_path)
-detections = run_inference(model=model, image_tensor=img_tensor)
-bounding_boxes(image_array=img_array, detections=detections)
-
-# %%
-
-masks = detections['masks']
-height, width = masks.shape[2:]
-class_ids = np.zeros((height, width))
-for i in range(len(masks)):
-    mask = masks[i, 0]
-    mask = mask > 0.5
-    label = detections['labels'][i].item()
-    class_ids[mask] = label
-
-
-
-#%%
-# Generate instance masks from semantic masks using connected components
-# 2d arrays, 0 is background, > 0 are instance ids
-
-NEW_CHOLECSEG8K_CLASSES = {}
-new_detections = {
+def separate_connected_components(detections):
+    new_detections = {
     'boxes': [],
     'labels': [],
     'masks': [],
     'scores': []
-}
+    }
 
-instance_ids = np.zeros_like(class_ids, dtype=np.int32)
-instance_counter = 1
-unique_classes = np.unique(class_ids)
-unique_classes = unique_classes[unique_classes != 0].astype(int)
+    masks = detections['masks']
+    height, width = masks.shape[2:]
+    class_ids_matrix = np.zeros((height, width)) # this matrix will be used to identify the regions on the original image.
+    for i in range(len(masks)):
+        mask = masks[i, 0]
+        mask = mask > 0.5
+        label = detections['labels'][i].item()
+        class_ids_matrix[mask] = label
 
-for class_id in unique_classes:
-    label_name = CHOLECSEG8K_CLASSES[class_id]
-    class_binary = (class_ids == class_id).astype(np.uint8)
-    num_components, labeled_components = cv2.connectedComponents(
-        class_binary, connectivity=8
-    )
-    
-    for component_id in range(1, num_components):
-        component_mask = labeled_components == component_id
-        component_area = component_mask.sum()
+    unique_classes = np.unique(class_ids_matrix)
+    unique_classes = unique_classes[unique_classes != 0].astype(int)
+
+    for class_id in unique_classes:
+        class_binary = (class_ids_matrix == class_id).astype(np.uint8)
+        num_components, labeled_components = cv2.connectedComponents(
+            class_binary, connectivity=8
+        )
         
-        if component_area < 200:
-            continue
+        for component_id in range(1, num_components):
+            component_mask = labeled_components == component_id
+            component_area = component_mask.sum()
+            
+            if component_area < 200: # This is to mitigate the detection of very small bounding boxes.
+                                    # maybe we can set this number in a better way...
+                continue
+            
+            # Compute bounding box from the component mask
+            # np.where returns (row_indices, col_indices), i.e., (y, x)
+            ys, xs = np.where(component_mask) #np.where takes in a condition and returns all the indices where the elements are true
+            x1, x2 = xs.min(), xs.max()
+            y1, y2 = ys.min(), ys.max()
+            
+            new_detections['boxes'].append([x1, y1, x2, y2])
+            new_detections['labels'].append(class_id)
+            new_detections['masks'].append(component_mask.astype(np.float32))
+            new_detections['scores'].append(1.0)
 
-        instance_ids[component_mask] = instance_counter
-        NEW_CHOLECSEG8K_CLASSES[instance_counter] = label_name
-        
-        # Compute bounding box from the component mask
-        # np.where returns (row_indices, col_indices), i.e., (y, x)
-        ys, xs = np.where(component_mask)
-        x1, x2 = xs.min(), xs.max()
-        y1, y2 = ys.min(), ys.max()
-        
-        new_detections['boxes'].append([x1, y1, x2, y2])
-        new_detections['labels'].append(class_id)
-        new_detections['masks'].append(component_mask.astype(np.float32))
-        # We lose the original per-instance score since we merged masks first;
-        # you could propagate scores from the original detections if needed
-        new_detections['scores'].append(1.0)
-        
-        instance_counter += 1
+    new_detections['boxes'] = torch.tensor(new_detections['boxes'], dtype=torch.float32)
+    new_detections['labels'] = torch.tensor(new_detections['labels'], dtype=torch.int64)
+    new_detections['masks'] = torch.tensor(np.stack(new_detections['masks'])[:, None, :, :], dtype=torch.float32)
+    new_detections['scores'] = torch.tensor(new_detections['scores'], dtype=torch.float32)
 
-# Convert to tensors matching the original format
-new_detections['boxes'] = torch.tensor(new_detections['boxes'], dtype=torch.float32)
-new_detections['labels'] = torch.tensor(new_detections['labels'], dtype=torch.int64)
-new_detections['masks'] = torch.tensor(np.stack(new_detections['masks'])[:, None, :, :], dtype=torch.float32)
-new_detections['scores'] = torch.tensor(new_detections['scores'], dtype=torch.float32)
-
-
+    return new_detections
 
 # %%
-bounding_boxes(image_array=img_array, detections=new_detections)
+
+if __name__ == "__main__":
+    CHECKPOINT_PATH = '/home/guests/myron_theocharakis/longform-surgery/forked_SASVi/checkpoints/cholecseg8k/maskrcnn/best_val_dice.pth'
+    device = 'cuda'
+    data_path = '/home/guests/myron_theocharakis/longform-surgery/forked_SASVi/test_split.txt'
+    save_path = '/home/guests/myron_theocharakis/longform-surgery/forked_SASVi/src/bbox_seg_masks_output/'
+    model = load_model(checkpoint_path=CHECKPOINT_PATH, device=device)
+    with open(data_path) as f:
+        for line in f:        
+            img_paths = [line for line in f]
+
+    print(len(img_paths))
+    # img_tensor, img_array = preprocess_image(image_path=img_path)
+    # detections = run_inference(model=model, image_tensor=img_tensor)
+    # ploting(image_array=img_array, detections=detections)
+    # new_detections = separate_connected_components(detections=detections)
+    # ploting(image_array=img_array, detections=new_detections)
+
 # %%
